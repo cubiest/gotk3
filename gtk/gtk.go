@@ -3693,6 +3693,16 @@ func wrapEntryCompletion(obj *glib.Object) *EntryCompletion {
 	return &EntryCompletion{obj}
 }
 
+// EntryCompletionNew is a wrapper around gtk_entry_completion_new
+func EntryCompletionNew() (*EntryCompletion, error) {
+	c := C.gtk_entry_completion_new()
+	if c == nil {
+		return nil, nilPtrErr
+	}
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapEntryCompletion(obj), nil
+}
+
 // SetModel is a wrapper around gtk_entry_completion_set_model
 func (v *EntryCompletion) SetModel(model ITreeModel) {
 	var mptr *C.GtkTreeModel

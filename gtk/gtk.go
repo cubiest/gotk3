@@ -3741,7 +3741,7 @@ func (v *EntryCompletion) SetInlineCompletion(inlineCompletion bool) {
 
 // GetInlineCompletion is a wrapper around gtk_entry_completion_get_inline_completion
 func (v *EntryCompletion) GetInlineCompletion() bool {
-	c := C.gtk_entry_completion_get_text_column(v.native())
+	c := C.gtk_entry_completion_get_inline_completion(v.native())
 	return gobool(c)
 }
 

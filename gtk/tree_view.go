@@ -122,17 +122,16 @@ func (v *TreeView) GetPathAtPos(x, y int, path *TreePath, column *TreeViewColumn
 
 // GetCellArea is a wrapper around gtk_tree_view_get_cell_area().
 func (v *TreeView) GetCellArea(path *TreePath, column *TreeViewColumn) *gdk.Rectangle {
-	var ctp **C.GtkTreePath
+	var ctp *C.GtkTreePath
 	if path != nil {
-		ctp = (**C.GtkTreePath)(unsafe.Pointer(&path.GtkTreePath))
+		ctp = (*C.GtkTreePath)(unsafe.Pointer(path.GtkTreePath))
 	} else {
 		ctp = nil
 	}
 
-	var pctvcol **C.GtkTreeViewColumn
+	var pctvcol *C.GtkTreeViewColumn
 	if column != nil {
-		ctvcol := column.native()
-		pctvcol = &ctvcol
+		pctvcol = column.native()
 	} else {
 		pctvcol = nil
 	}
@@ -141,7 +140,7 @@ func (v *TreeView) GetCellArea(path *TreePath, column *TreeViewColumn) *gdk.Rect
 
 	C.gtk_tree_view_get_cell_area(v.native(), ctp, pctvcol, &rect)
 
-	return WrapRectangle(uintptr(unsafe.Pointer(&rect)))
+	return gdk.WrapRectangle(uintptr(unsafe.Pointer(&rect)))
 }
 
 // GetLevelIndentation is a wrapper around gtk_tree_view_get_level_indentation().

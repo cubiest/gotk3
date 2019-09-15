@@ -27,6 +27,7 @@ import "C"
 import (
 	"unsafe"
 
+	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/glib"
 )
 
@@ -417,4 +418,30 @@ func PopoverNew(relative IWidget) (*Popover, error) {
 		return nil, nilPtrErr
 	}
 	return wrapPopover(glib.Take(unsafe.Pointer(c))), nil
+}
+
+// SetRelativeTo is a wrapper around gtk_popover_set_relative_to().
+func (p *Popover) SetRelativeTo(relative IWidget) {
+	C.gtk_popover_set_relative_to(p.native(), relative.toWidget())
+}
+
+// GetRelativeTo is a wrapper around gtk_popover_get_relative_to().
+func (p *Popover) GetRelativeTo() *Widget {
+	c := C.gtk_popover_get_relative_to(p.native())
+	if c == nil {
+		return nil
+	}
+	return wrapWidget(glib.Take(unsafe.Pointer(c)))
+}
+
+// SetPointingTo is a wrapper around gtk_popover_set_pointing_to().
+func (p *Popover) SetPointingTo(rect gdk.Rectangle) {
+	C.gtk_popover_set_pointing_to(p.native(), nativeGdkRectangle(rect))
+}
+
+// GetPointingTo is a wrapper around gtk_popover_get_pointing_to().
+func (p *Popover) GetPointingTo() (*gdk.Rectangle, bool) {
+	var crect C.GdkRectangle
+	isSet := C.gtk_popover_get_pointing_to(p.native(), &crect)
+	return gdk.WrapRectangle(uintptr(unsafe.Pointer(&crect))), gobool(isSet)
 }

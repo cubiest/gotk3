@@ -1986,7 +1986,7 @@ func (r *Rectangle) GetY() int {
 }
 
 // SetY sets y field of the underlying GdkRectangle.
-func (r *Rectangle) SetY(y int) int {
+func (r *Rectangle) SetY(y int) {
 	r.native().y = C.int(y)
 }
 
@@ -1996,7 +1996,7 @@ func (r *Rectangle) GetWidth() int {
 }
 
 // SetWidth sets width field of the underlying GdkRectangle.
-func (r *Rectangle) SetWidth(width int) int {
+func (r *Rectangle) SetWidth(width int) {
 	r.native().width = C.int(width)
 }
 
@@ -2006,7 +2006,7 @@ func (r *Rectangle) GetHeight() int {
 }
 
 // SetHeight sets height field of the underlying GdkRectangle.
-func (r *Rectangle) SetHeight(height int) int {
+func (r *Rectangle) SetHeight(height int) {
 	r.native().height = C.int(height)
 }
 

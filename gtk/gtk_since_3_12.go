@@ -421,13 +421,13 @@ func PopoverNew(relative IWidget) (*Popover, error) {
 }
 
 // SetRelativeTo is a wrapper around gtk_popover_set_relative_to().
-func (p *Popover) SetRelativeTo(relative IWidget) {
-	C.gtk_popover_set_relative_to(p.native(), relative.toWidget())
+func (v *Popover) SetRelativeTo(relative IWidget) {
+	C.gtk_popover_set_relative_to(v.native(), relative.toWidget())
 }
 
 // GetRelativeTo is a wrapper around gtk_popover_get_relative_to().
-func (p *Popover) GetRelativeTo() *Widget {
-	c := C.gtk_popover_get_relative_to(p.native())
+func (v *Popover) GetRelativeTo() *Widget {
+	c := C.gtk_popover_get_relative_to(v.native())
 	if c == nil {
 		return nil
 	}
@@ -435,13 +435,13 @@ func (p *Popover) GetRelativeTo() *Widget {
 }
 
 // SetPointingTo is a wrapper around gtk_popover_set_pointing_to().
-func (p *Popover) SetPointingTo(rect gdk.Rectangle) {
-	C.gtk_popover_set_pointing_to(p.native(), nativeGdkRectangle(rect))
+func (v *Popover) SetPointingTo(rect gdk.Rectangle) {
+	C.gtk_popover_set_pointing_to(v.native(), nativeGdkRectangle(rect))
 }
 
 // GetPointingTo is a wrapper around gtk_popover_get_pointing_to().
-func (p *Popover) GetPointingTo() (*gdk.Rectangle, bool) {
+func (v *Popover) GetPointingTo() (*gdk.Rectangle, bool) {
 	var crect C.GdkRectangle
-	isSet := C.gtk_popover_get_pointing_to(p.native(), &crect)
+	isSet := C.gtk_popover_get_pointing_to(v.native(), &crect)
 	return gdk.WrapRectangle(uintptr(unsafe.Pointer(&crect))), gobool(isSet)
 }

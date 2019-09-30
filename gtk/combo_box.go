@@ -175,6 +175,12 @@ func (v *ComboBox) Popdown() {
 	C.gtk_combo_box_popdown(v.native())
 }
 
+// HasEntry is a wrapper around gtk_combo_box_get_has_entry().
+func (v *ComboBox) HasEntry() bool {
+	c := C.gtk_combo_box_get_has_entry(v.native())
+	return gobool(c)
+}
+
 // SetEntryTextColumn is a wrapper around gtk_combo_box_set_entry_text_column()
 func (v *ComboBox) SetEntryTextColumn(textColumn int) {
 	C.gtk_combo_box_set_entry_text_column(v.native(), C.gint(textColumn))

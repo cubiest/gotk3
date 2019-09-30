@@ -115,29 +115,6 @@ func (v *TreeView) GetPathAtPos(x, y int, path **TreePath, column **TreeViewColu
 
 // GetCellArea is a wrapper around gtk_tree_view_get_cell_area().
 func (v *TreeView) GetCellArea(path *TreePath, column *TreeViewColumn) *gdk.Rectangle {
-	var ctp *C.GtkTreePath
-	if path != nil {
-		ctp = (*C.GtkTreePath)(unsafe.Pointer(path.GtkTreePath))
-	} else {
-		ctp = nil
-	}
-
-	var pctvcol *C.GtkTreeViewColumn
-	if column != nil {
-		pctvcol = column.native()
-	} else {
-		pctvcol = nil
-	}
-
-	var rect C.GdkRectangle
-
-	C.gtk_tree_view_get_cell_area(v.native(), ctp, pctvcol, &rect)
-
-	return gdk.WrapRectangle(uintptr(unsafe.Pointer(&rect)))
-}
-
-// GetCellArea is a wrapper around gtk_tree_view_get_cell_area().
-func (v *TreeView) GetCellArea(path *TreePath, column *TreeViewColumn) *gdk.Rectangle {
 	ctp := path.native()
 	pctvcol := column.native()
 

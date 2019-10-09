@@ -154,10 +154,10 @@ func PopoverMenuNew() (*PopoverMenu, error) {
 
 // OpenSubmenu is a wrapper around gtk_popover_menu_open_submenu
 func (v *PopoverMenu) OpenSubmenu(name string) {
-	cstr1 := (*C.gchar)(C.CString(name))
+	cstr1 := C.CString(name)
 	defer C.free(unsafe.Pointer(cstr1))
 
-	C.gtk_popover_menu_open_submenu(v.native(), cstr1)
+	C.gtk_popover_menu_open_submenu(v.native(), (*C.gchar)(cstr))
 }
 
 /*

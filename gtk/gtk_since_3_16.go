@@ -50,6 +50,10 @@ const (
 	BUTTON_ROLE_RADIO  ButtonRole = C.GTK_BUTTON_ROLE_RADIO
 )
 
+/*
+ * GtkScrolledWindow
+ */
+
 // SetOverlayScrolling is a wrapper around gtk_scrolled_window_set_overlay_scrolling().
 func (v *ScrolledWindow) SetOverlayScrolling(scrolling bool) {
 	C.gtk_scrolled_window_set_overlay_scrolling(v.native(), gbool(scrolling))
@@ -60,6 +64,10 @@ func (v *ScrolledWindow) GetOverlayScrolling() bool {
 	return gobool(C.gtk_scrolled_window_get_overlay_scrolling(v.native()))
 }
 
+/*
+ * GtkPaned
+ */
+
 // SetWideHandle is a wrapper around gtk_paned_set_wide_handle().
 func (v *Paned) SetWideHandle(wide bool) {
 	C.gtk_paned_set_wide_handle(v.native(), gbool(wide))
@@ -69,6 +77,10 @@ func (v *Paned) SetWideHandle(wide bool) {
 func (v *Paned) GetWideHandle() bool {
 	return gobool(C.gtk_paned_get_wide_handle(v.native()))
 }
+
+/*
+ * GtkLabel
+ */
 
 // GetXAlign is a wrapper around gtk_label_get_xalign().
 func (v *Label) GetXAlign() float64 {
@@ -222,10 +234,19 @@ func (v *StackSidebar) GetStack() *Stack {
 	return wrapStack(glib.Take(unsafe.Pointer(c)))
 }
 
+/*
+ * GtkEntry
+ */
+
 // GrabFocusWithoutSelecting is a wrapper for gtk_entry_grab_focus_without_selecting()
 func (v *Entry) GrabFocusWithoutSelecting() {
 	C.gtk_entry_grab_focus_without_selecting(v.native())
 }
+
+/*
+ * GtkTextBuffer
+ */
+
 
 // InsertMarkup() is a wrapper around  gtk_text_buffer_insert_markup()
 func (v *TextBuffer) InsertMarkup(start *TextIter, text string) {

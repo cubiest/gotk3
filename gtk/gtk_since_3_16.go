@@ -50,6 +50,11 @@ const (
 	BUTTON_ROLE_RADIO  ButtonRole = C.GTK_BUTTON_ROLE_RADIO
 )
 
+func marshalButtonRole(p uintptr) (interface{}, error) {
+	c := C.g_value_get_enum((*C.GValue)(unsafe.Pointer(p)))
+	return ButtonRole(c), nil
+}
+
 /*
  * GtkScrolledWindow
  */
@@ -246,7 +251,6 @@ func (v *Entry) GrabFocusWithoutSelecting() {
 /*
  * GtkTextBuffer
  */
-
 
 // InsertMarkup() is a wrapper around  gtk_text_buffer_insert_markup()
 func (v *TextBuffer) InsertMarkup(start *TextIter, text string) {

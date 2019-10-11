@@ -37,6 +37,19 @@ func init() {
 	}
 }
 
+/*
+ * Constants
+ */
+
+ // ButtonRole is a representation of GTK's GtkButtonRole.
+type ButtonRole int
+
+const (
+	BUTTON_ROLE_NORMAL ButtonRole = C.GTK_BUTTON_ROLE_NORMAL
+	BUTTON_ROLE_CHECK  ButtonRole = C.GTK_BUTTON_ROLE_CHECK
+	BUTTON_ROLE_RADIO  ButtonRole = C.GTK_BUTTON_ROLE_RADIO
+)
+
 // SetOverlayScrolling is a wrapper around gtk_scrolled_window_set_overlay_scrolling().
 func (v *ScrolledWindow) SetOverlayScrolling(scrolling bool) {
 	C.gtk_scrolled_window_set_overlay_scrolling(v.native(), gbool(scrolling))

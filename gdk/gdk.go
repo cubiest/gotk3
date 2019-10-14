@@ -332,6 +332,14 @@ const (
 	GDK_EVENT_STOP      bool = C.GDK_EVENT_STOP != 0
 )
 
+// BUTTON constants
+
+const (
+	BUTTON_PRIMARY = C.GDK_BUTTON_PRIMARY
+	BUTTON_MIDDLE = C.GDK_BUTTON_MIDDLE
+	BUTTON_SECONDARY = GDK_BUTTON_SECONDARY
+)
+
 // CrossingMode is a representation of GDK's GdkCrossingMode.
 
 type CrossingMode int

@@ -231,11 +231,11 @@ type MenuItem struct {
 }
 
 // native() returns a pointer to the underlying GMenuItem.
-func (m *MenuItem) native() *C.GMenuItem {
-	if m == nil || m.GObject == nil {
+func (v *MenuItem) native() *C.GMenuItem {
+	if v == nil || v.GObject == nil {
 		return nil
 	}
-	p := unsafe.Pointer(m.GObject)
+	p := unsafe.Pointer(v.GObject)
 	return C.toGMenuItem(p)
 }
 
@@ -344,7 +344,26 @@ func (v *MenuItem) SetLink(link string, model *MenuModel) {
 
 // void 	g_menu_item_set_action_and_target_value ()
 // void 	g_menu_item_set_action_and_target ()
-// GVariant * 	g_menu_item_get_attribute_value ()
 // gboolean 	g_menu_item_get_attribute ()
-// void 	g_menu_item_set_attribute_value ()
+
+// SetAttributeValue is a wrapper around g_menu_item_set_attribute_value()
+func(v *MenuItem) SetAttributeValue(attribute string, value IVariant) {
+	cstr1 := (*C.gchar)(C.CString(attribute))
+	defer C.free(unsafe.Pointer(cstr1))
+
+	C.g_menu_item_set_attribute_value(v.native(), cstr1, value.ToGVariant())
+}
+
+// GetAttributeValue is a wrapper around g_menu_item_get_attribute_value()
+func (v *MenuItem) GetAttributeValue(attribute string, expectedType *VariantType) *Variant {
+	cstr1 := (*C.gchar)(C.CString(attribute))
+	defer C.free(unsafe.Pointer(cstr1))
+
+	c := C.g_menu_item_get_attribute_value(v.native(), cstr1, expectedType.native())
+	if c == nil {
+		return nil
+	}
+	return newVariant(c)
+}
+
 // void 	g_menu_item_set_attribute ()

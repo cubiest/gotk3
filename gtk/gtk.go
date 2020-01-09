@@ -2914,7 +2914,8 @@ func (v *Dialog) GetContentArea() (*Box, error) {
 }
 
 // DialogNewWithButtons() is a wrapper around gtk_dialog_new_with_buttons().
-func DialogNewWithButtons(title string, parent IWindow, flags DialogFlags, buttons ...string) (dialog *Dialog, err error) {
+// i.e: []interface{}{"Accept", gtk.RESPONSE_ACCEPT}.
+func DialogNewWithButtons(title string, parent IWindow, flags DialogFlags, buttons ...[]interface{}) (dialog *Dialog, err error) {
 	cstr := (*C.gchar)(C.CString(title))
 	defer C.free(unsafe.Pointer(cstr))
 
@@ -2924,21 +2925,17 @@ func DialogNewWithButtons(title string, parent IWindow, flags DialogFlags, butto
 	}
 
 	var cbutton *C.gchar = nil
-	if len(buttons) > 0 {
-		cbutton = (*C.gchar)(C.CString(buttons[0]))
-		defer C.free(unsafe.Pointer(cbutton))
-	}
-
 	c := C._gtk_dialog_new_with_buttons(cstr, w, C.GtkDialogFlags(flags), cbutton)
 	if c == nil {
 		return nil, nilPtrErr
 	}
 	dialog = wrapDialog(glib.Take(unsafe.Pointer(c)))
 
-	for idx := 1; idx < len(buttons); idx++ {
-		cbutton = (*C.gchar)(C.CString(buttons[idx]))
+	for idx := 0; idx < len(buttons); idx++ {
+		cbutton = (*C.gchar)(C.CString(buttons[idx][0].(string)))
 		defer C.free(unsafe.Pointer(cbutton))
-		if C.gtk_dialog_add_button(dialog.native(), cbutton, C.gint(idx)) == nil {
+
+		if C.gtk_dialog_add_button(dialog.native(), cbutton, C.gint(buttons[idx][1].(ResponseType))) == nil {
 			return nil, nilPtrErr
 		}
 	}
@@ -4877,11 +4874,30 @@ func (v *Image) GetIconSet() {
 }
 */
 
-// TODO(jrick) GdkPixbufAnimation
-/*
-func (v *Image) GetAnimation() {
+// GetAnimation() is a wrapper around gtk_image_get_animation()
+func (v *Image) GetAnimation() *gdk.PixbufAnimation {
+	c := C.gtk_image_get_animation(v.native())
+	if c == nil {
+		return nil
+	}
+	return &gdk.PixbufAnimation{glib.Take(unsafe.Pointer(c))}
 }
-*/
+
+// ImageNewFromAnimation() is a wrapper around gtk_image_new_from_animation()
+func ImageNewFromAnimation(animation *gdk.PixbufAnimation) (*Image, error) {
+	c := C.gtk_image_new_from_animation((*C.GdkPixbufAnimation)(animation.NativePrivate()))
+	if c == nil {
+		return nil, nilPtrErr
+	}
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapImage(obj), nil
+}
+
+// SetFromAnimation is a wrapper around gtk_image_set_from_animation().
+func (v *Image) SetFromAnimation(animation *gdk.PixbufAnimation) {
+	pbaptr := (*C.GdkPixbufAnimation)(unsafe.Pointer(animation.NativePrivate()))
+	C.gtk_image_set_from_animation(v.native(), pbaptr)
+}
 
 // GetIconName() is a wrapper around gtk_image_get_icon_name().
 func (v *Image) GetIconName() (string, IconSize) {
@@ -6540,6 +6556,17 @@ func (v *Range) SetRange(min, max float64) {
 	C.gtk_range_set_range(v.native(), C.gdouble(min), C.gdouble(max))
 }
 
+// GetInverted() is a wrapper around gtk_range_get_inverted().
+func (v *Range) GetInverted() bool {
+	c := C.gtk_range_get_inverted(v.native())
+	return gobool(c)
+}
+
+// SetInverted() is a wrapper around gtk_range_set_inverted().
+func (v *Range) SetInverted(inverted bool) {
+	C.gtk_range_set_inverted(v.native(), gbool(inverted))
+}
+
 // IRecentChooser is an interface type implemented by all structs
 // embedding a RecentChooser.  It is meant to be used as an argument type
 // for wrapper functions that wrap around a C GTK function taking a
@@ -8087,6 +8114,13 @@ func (v *TextBuffer) RemoveSelectionClipboard(clipboard *Clipboard) {
 	C.gtk_text_buffer_remove_selection_clipboard(v.native(), clipboard.native())
 }
 
+// GetIterAtLineIndex() is a wrapper around gtk_text_buffer_get_iter_at_line_index().
+func (v *TextBuffer) GetIterAtLineIndex(lineNumber, charIndex int) (iter *TextIter) {
+	iter = new(TextIter)
+	C.gtk_text_buffer_get_iter_at_line_index(v.native(), (*C.GtkTextIter)(iter), (C.gint)(lineNumber), (C.gint)(charIndex))
+	return
+}
+
 /*
  * GtkToggleButton
  */
@@ -9299,6 +9333,46 @@ func (v *TreeSelection) PathIsSelected(path *TreePath) bool {
 	return gobool(C.gtk_tree_selection_path_is_selected(v.native(), path.native()))
 }
 
+// TreeSelectionForeachFunc defines the function prototype for the selected_foreach function (f arg) for
+// (* TreeSelection).SelectedForEach
+type TreeSelectionForeachFunc func(model *TreeModel, path *TreePath, iter *TreeIter, userData interface{})
+
+type treeSelectionForeachFuncData struct {
+	fn       TreeSelectionForeachFunc
+	userData interface{}
+}
+
+var (
+	treeSelectionForeachFuncRegistry = struct {
+		sync.RWMutex
+		next int
+		m    map[int]treeSelectionForeachFuncData
+	}{
+		next: 1,
+		m:    make(map[int]treeSelectionForeachFuncData),
+	}
+)
+
+// SelectedForEach() is a wrapper around gtk_tree_selection_selected_foreach()
+func (v *TreeSelection) SelectedForEach(f TreeSelectionForeachFunc, userData ...interface{}) error {
+	if len(userData) > 1 {
+		return errors.New("userData len must be 0 or 1")
+	}
+
+	t := treeSelectionForeachFuncData{fn: f}
+	if len(userData) > 0 {
+		t.userData = userData[0]
+	}
+	treeSelectionForeachFuncRegistry.Lock()
+	id := treeSelectionForeachFuncRegistry.next
+	treeSelectionForeachFuncRegistry.next++
+	treeSelectionForeachFuncRegistry.m[id] = t
+	treeSelectionForeachFuncRegistry.Unlock()
+
+	C._gtk_tree_selection_selected_foreach(v.native(), C.gpointer(uintptr(id)))
+	return nil
+}
+
 /*
  * GtkTreeRowReference
  */
@@ -9483,6 +9557,34 @@ func (v *TreeStore) InsertAfter(parent, sibling *TreeIter) *TreeIter {
 	C.gtk_tree_store_insert_after(v.native(), &ti, parent.native(), sibling.native())
 	iter := &TreeIter{ti}
 	return iter
+}
+
+// InsertWithValues() is a wrapper around gtk_tree_store_insert_with_valuesv().
+func (v *TreeStore) InsertWithValues(iter, parent *TreeIter, position int, inColumns []int, inValues []interface{}) error {
+	length := len(inColumns)
+	if len(inValues) < length {
+		length = len(inValues)
+	}
+
+	var cColumns []C.gint
+	var cValues []C.GValue
+	for i := 0; i < length; i++ {
+		cColumns = append(cColumns, C.gint(inColumns[i]))
+
+		gv, err := glib.GValue(inValues[i])
+		if err != nil {
+			return err
+		}
+
+		var cvp *C.GValue = (*C.GValue)(gv.Native())
+		cValues = append(cValues, *cvp)
+	}
+	var cColumnsPointer *C.gint = &cColumns[0]
+	var cValuesPointer *C.GValue = &cValues[0]
+
+	C.gtk_tree_store_insert_with_valuesv(v.native(), iter.native(), parent.native(), C.gint(position), cColumnsPointer, cValuesPointer, C.gint(length))
+
+	return nil
 }
 
 /*

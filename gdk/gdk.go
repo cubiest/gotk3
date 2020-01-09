@@ -49,6 +49,7 @@ func init() {
 		{glib.Type(C.gdk_display_get_type()), marshalDisplay},
 		{glib.Type(C.gdk_drag_context_get_type()), marshalDragContext},
 		{glib.Type(C.gdk_pixbuf_get_type()), marshalPixbuf},
+		{glib.Type(C.gdk_pixbuf_animation_get_type()), marshalPixbufAnimation},
 		{glib.Type(C.gdk_rgba_get_type()), marshalRGBA},
 		{glib.Type(C.gdk_screen_get_type()), marshalScreen},
 		{glib.Type(C.gdk_visual_get_type()), marshalVisual},
@@ -345,29 +346,28 @@ const (
 type CrossingMode int
 
 const (
-	CROSSING_NORMAL CrossingMode = C.GDK_CROSSING_NORMAL
-	CROSSING_GRAB CrossingMode = C.GDK_CROSSING_GRAB
-	CROSSING_UNGRAB CrossingMode = C.GDK_CROSSING_UNGRAB
-	CROSSING_GTK_GRAB CrossingMode = C.GDK_CROSSING_GTK_GRAB
-	CROSSING_GTK_UNGRAB CrossingMode = C.GDK_CROSSING_GTK_UNGRAB
+	CROSSING_NORMAL        CrossingMode = C.GDK_CROSSING_NORMAL
+	CROSSING_GRAB          CrossingMode = C.GDK_CROSSING_GRAB
+	CROSSING_UNGRAB        CrossingMode = C.GDK_CROSSING_UNGRAB
+	CROSSING_GTK_GRAB      CrossingMode = C.GDK_CROSSING_GTK_GRAB
+	CROSSING_GTK_UNGRAB    CrossingMode = C.GDK_CROSSING_GTK_UNGRAB
 	CROSSING_STATE_CHANGED CrossingMode = C.GDK_CROSSING_STATE_CHANGED
-	CROSSING_TOUCH_BEGIN CrossingMode = C.GDK_CROSSING_TOUCH_BEGIN
-	CROSSING_TOUCH_END CrossingMode = C.GDK_CROSSING_TOUCH_END
+	CROSSING_TOUCH_BEGIN   CrossingMode = C.GDK_CROSSING_TOUCH_BEGIN
+	CROSSING_TOUCH_END     CrossingMode = C.GDK_CROSSING_TOUCH_END
 	CROSSING_DEVICE_SWITCH CrossingMode = C.GDK_CROSSING_DEVICE_SWITCH
 )
-
 
 // NotifyType is a representation of GDK's GdkNotifyType.
 
 type NotifyType int
 
 const (
-	NOTIFY_ANCESTOR NotifyType = C.GDK_NOTIFY_ANCESTOR
-	NOTIFY_VIRTUAL NotifyType = C.GDK_NOTIFY_VIRTUAL
-	NOTIFY_INFERIOR NotifyType = C.GDK_NOTIFY_INFERIOR
-	NOTIFY_NONLINEAR NotifyType = C.GDK_NOTIFY_NONLINEAR
+	NOTIFY_ANCESTOR          NotifyType = C.GDK_NOTIFY_ANCESTOR
+	NOTIFY_VIRTUAL           NotifyType = C.GDK_NOTIFY_VIRTUAL
+	NOTIFY_INFERIOR          NotifyType = C.GDK_NOTIFY_INFERIOR
+	NOTIFY_NONLINEAR         NotifyType = C.GDK_NOTIFY_NONLINEAR
 	NOTIFY_NONLINEAR_VIRTUAL NotifyType = C.GDK_NOTIFY_NONLINEAR_VIRTUAL
-	NOTIFY_UNKNOWN NotifyType = C.GDK_NOTIFY_UNKNOWN
+	NOTIFY_UNKNOWN           NotifyType = C.GDK_NOTIFY_UNKNOWN
 )
 
 /*
@@ -1223,12 +1223,10 @@ func (v *EventCrossing) Detail() NotifyType {
 	return NotifyType(c)
 }
 
-
 func (v *EventCrossing) Focus() bool {
 	c := v.native().focus
 	return gobool(c)
 }
-
 
 /*
  * GdkEventScroll
@@ -1747,6 +1745,56 @@ func PixbufGetFileInfo(filename string) (format interface{}, width, height int) 
 }
 
 /*
+ * GdkPixbufAnimation
+ */
+
+// PixbufAnimation is a representation of GDK's GdkPixbufAnimation.
+type PixbufAnimation struct {
+	*glib.Object
+}
+
+// native returns a pointer to the underlying GdkPixbufAnimation.
+func (v *PixbufAnimation) native() *C.GdkPixbufAnimation {
+	if v == nil || v.GObject == nil {
+		return nil
+	}
+	p := unsafe.Pointer(v.GObject)
+	return C.toGdkPixbufAnimation(p)
+}
+
+func (v *PixbufAnimation) NativePrivate() *C.GdkPixbufAnimation {
+	if v == nil || v.GObject == nil {
+		return nil
+	}
+	p := unsafe.Pointer(v.GObject)
+	return C.toGdkPixbufAnimation(p)
+}
+
+func marshalPixbufAnimation(p uintptr) (interface{}, error) {
+	c := C.g_value_get_object((*C.GValue)(unsafe.Pointer(p)))
+	obj := &glib.Object{glib.ToGObject(unsafe.Pointer(c))}
+	return &PixbufAnimation{obj}, nil
+}
+
+// PixbufAnimationNewFromFile is a wrapper around gdk_pixbuf_animation_new_from_file().
+func PixbufAnimationNewFromFile(filename string) (*PixbufAnimation, error) {
+	cstr := C.CString(filename)
+	defer C.free(unsafe.Pointer(cstr))
+
+	var err *C.GError
+	c := C.gdk_pixbuf_animation_new_from_file((*C.char)(cstr), &err)
+	if c == nil {
+		defer C.g_error_free(err)
+		return nil, errors.New(C.GoString((*C.char)(err.message)))
+	}
+
+	obj := &glib.Object{glib.ToGObject(unsafe.Pointer(c))}
+	p := &PixbufAnimation{obj}
+	runtime.SetFinalizer(p, func(_ interface{}) { obj.Unref() })
+	return p, nil
+}
+
+/*
  * GdkPixbufLoader
  */
 
@@ -1883,6 +1931,48 @@ func (v *PixbufLoader) GetPixbuf() (*Pixbuf, error) {
 	p := &Pixbuf{obj}
 	//obj.Ref() // Don't call Ref here, gdk_pixbuf_loader_get_pixbuf already did that for us.
 	runtime.SetFinalizer(p, func(_ interface{}) { obj.Unref() })
+	return p, nil
+}
+
+// GetAnimation is a wrapper around gdk_pixbuf_loader_get_animation().
+func (v *PixbufLoader) GetAnimation() (*PixbufAnimation, error) {
+	c := C.gdk_pixbuf_loader_get_animation(v.native())
+	if c == nil {
+		return nil, nilPtrErr
+	}
+
+	obj := &glib.Object{glib.ToGObject(unsafe.Pointer(c))}
+	p := &PixbufAnimation{obj}
+	runtime.SetFinalizer(p, func(_ interface{}) { obj.Unref() })
+	return p, nil
+}
+
+// Convenient function like above for Pixbuf. Write data, close loader and return PixbufAnimation.
+func (v *PixbufLoader) WriteAndReturnPixbufAnimation(data []byte) (*PixbufAnimation, error) {
+
+	if len(data) == 0 {
+		return nil, errors.New("no data")
+	}
+
+	var err *C.GError
+	c := C.gdk_pixbuf_loader_write(v.native(), (*C.guchar)(unsafe.Pointer(&data[0])), C.gsize(len(data)), &err)
+
+	if !gobool(c) {
+		defer C.g_error_free(err)
+		return nil, errors.New(C.GoString((*C.char)(err.message)))
+	}
+
+	v.Close()
+
+	c2 := C.gdk_pixbuf_loader_get_animation(v.native())
+	if c2 == nil {
+		return nil, nilPtrErr
+	}
+
+	obj := &glib.Object{glib.ToGObject(unsafe.Pointer(c2))}
+	p := &PixbufAnimation{obj}
+	runtime.SetFinalizer(p, func(_ interface{}) { obj.Unref() })
+
 	return p, nil
 }
 
@@ -2078,6 +2168,30 @@ func (v *Window) native() *C.GdkWindow {
 // Native returns a pointer to the underlying GdkWindow.
 func (v *Window) Native() uintptr {
 	return uintptr(unsafe.Pointer(v.native()))
+}
+
+// WindowGetWidth is a wrapper around gdk_window_get_width()
+func (v *Window) WindowGetWidth() (width int) {
+	return int(C.gdk_window_get_width(v.native()))
+}
+
+// WindowGetHeight is a wrapper around gdk_window_get_height()
+func (v *Window) WindowGetHeight() (height int) {
+	return int(C.gdk_window_get_height(v.native()))
+}
+
+//PixbufGetFromWindow is a wrapper around gdk_pixbuf_get_from_window()
+func (v *Window) PixbufGetFromWindow(x, y, w, h int) (*Pixbuf, error) {
+	c := C.gdk_pixbuf_get_from_window(v.native(), C.gint(x), C.gint(y), C.gint(w), C.gint(h))
+	if c == nil {
+		return nil, nilPtrErr
+	}
+
+	obj := &glib.Object{glib.ToGObject(unsafe.Pointer(c))}
+	p := &Pixbuf{obj}
+	//obj.Ref()
+	runtime.SetFinalizer(p, func(_ interface{}) { obj.Unref() })
+	return p, nil
 }
 
 func marshalWindow(p uintptr) (interface{}, error) {

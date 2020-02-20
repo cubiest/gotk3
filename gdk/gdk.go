@@ -374,12 +374,13 @@ const (
 	GDK_EVENT_STOP      bool = C.GDK_EVENT_STOP != 0
 )
 
-// BUTTON constants
+// Button constants
+type Button uint
 
 const (
-	BUTTON_PRIMARY = C.GDK_BUTTON_PRIMARY
-	BUTTON_MIDDLE = C.GDK_BUTTON_MIDDLE
-	BUTTON_SECONDARY = C.GDK_BUTTON_SECONDARY
+	BUTTON_PRIMARY   Button = C.GDK_BUTTON_PRIMARY
+	BUTTON_MIDDLE    Button = C.GDK_BUTTON_MIDDLE
+	BUTTON_SECONDARY Button = C.GDK_BUTTON_SECONDARY
 )
 
 // CrossingMode is a representation of GDK's GdkCrossingMode.
@@ -2169,8 +2170,6 @@ func (c *RGBA) String() string {
 /*
  * GdkRGBA
  */
-
-
 
 /*
  * GdkRectangle

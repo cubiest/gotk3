@@ -1,4 +1,4 @@
-//+build gtk_3_6 gtk_3_8 gtk_3_10 gtk_3_12 gtk_3_14 gtk_3_16 gtk_3_18 gtk_3_20 gtk_3_22
+//+build gtk_3_6 gtk_3_8 gtk_3_10 gtk_3_12 gtk_3_14 gtk_3_16 gtk_3_18 gtk_3_20 gtk_3_22 gtk_deprecated
 
 package gtk
 
@@ -24,6 +24,10 @@ func (v *Container) GetFocusChain() ([]*Widget, bool) {
 	return widgets, gobool(c)
 }
 
+/*
+ * GtkContainer
+ */
+
 // SetFocusChain is a wrapper around gtk_container_set_focus_chain().
 func (v *Container) SetFocusChain(focusableWidgets []IWidget) {
 	var list *glib.List
@@ -34,6 +38,9 @@ func (v *Container) SetFocusChain(focusableWidgets []IWidget) {
 	glist := (*C.GList)(unsafe.Pointer(list))
 	C.gtk_container_set_focus_chain(v.native(), glist)
 }
+
+// TODO:
+// gtk_container_unset_focus_chain
 
 // CssProviderGetDefault is a wrapper around gtk_css_provider_get_default().
 func CssProviderGetDefault() (*CssProvider, error) {

@@ -1,14 +1,36 @@
+// Same copyright and license as the rest of the files in this project
 // +build !gtk_3_6,!gtk_3_8,!gtk_3_10,!gtk_3_12
 
 package gtk
 
 // #include <stdlib.h>
 // #include <gtk/gtk.h>
+// #include "gtk_since_3_14.go.h"
 import "C"
 import (
+	"sync"
 	"unsafe"
+
 	"github.com/gotk3/gotk3/glib"
 )
+
+/*
+ * Constants
+ */
+
+const (
+	STATE_FLAG_CHECKED StateFlags = C.GTK_STATE_FLAG_CHECKED
+)
+
+/*
+ * GtkStack
+ */
+
+// TODO:
+// GtkStackTransitionType
+// GTK_STACK_TRANSITION_TYPE_OVER_DOWN_UP
+// GTK_STACK_TRANSITION_TYPE_OVER_LEFT_RIGHT
+// GTK_STACK_TRANSITION_TYPE_OVER_RIGHT_LEFT
 
 /*
  * GtkListBox
@@ -29,7 +51,40 @@ func (v *ListBox) UnselectAll() {
 	C.gtk_list_box_unselect_all(v.native())
 }
 
-// TODO: gtk_list_box_selected_foreach()
+// ListBoxForeachFunc is a representation of GtkListBoxForeachFunc
+type ListBoxForeachFunc func(box *ListBox, row *ListBoxRow, userData ...interface{}) int
+
+type listBoxForeachFuncData struct {
+	fn       ListBoxForeachFunc
+	userData []interface{}
+}
+
+var (
+	listBoxForeachFuncRegistry = struct {
+		sync.RWMutex
+		next int
+		m    map[int]listBoxForeachFuncData
+	}{
+		next: 1,
+		m:    make(map[int]listBoxForeachFuncData),
+	}
+)
+
+// SelectedForeach is a wrapper around gtk_list_box_selected_foreach().
+func (v *ListBox) SelectedForeach(fn ListBoxForeachFunc, userData ...interface{}) {
+	listBoxForeachFuncRegistry.Lock()
+	id := listBoxForeachFuncRegistry.next
+	listBoxForeachFuncRegistry.next++
+	listBoxForeachFuncRegistry.m[id] = listBoxForeachFuncData{fn: fn, userData: userData}
+	listBoxForeachFuncRegistry.Unlock()
+
+	C._gtk_list_box_selected_foreach(v.native(), C.gpointer(uintptr(id)))
+
+	// Clean up callback immediately as we only need it for the duration of this Foreach call
+	listBoxForeachFuncRegistry.Lock()
+	delete(listBoxForeachFuncRegistry.m, id)
+	listBoxForeachFuncRegistry.Unlock()
+}
 
 // GetSelectedRows is a wrapper around gtk_list_box_get_selected_rows().
 func (v *ListBox) GetSelectedRows() *glib.List {
@@ -77,3 +132,19 @@ func (v *ListBoxRow) GetSelectable() bool {
 	c := C.gtk_list_box_row_get_selectable(v.native())
 	return gobool(c)
 }
+
+/*
+ * GtkPlacesSidebar
+ */
+
+// TODO:
+// gtk_places_sidebar_get_show_enter_location().
+// gtk_places_sidebar_set_show_enter_location().
+
+/*
+ * GtkSwitch
+ */
+
+// TODO:
+// gtk_switch_set_state().
+// gtk_switch_get_state().

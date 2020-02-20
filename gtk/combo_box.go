@@ -7,6 +7,7 @@ import (
 	"errors"
 	"unsafe"
 
+	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/glib"
 )
 
@@ -91,6 +92,49 @@ func ComboBoxNewWithModel(model ITreeModel) (*ComboBox, error) {
 	return wrapComboBox(obj), nil
 }
 
+// is a wrapper around gtk_combo_box_new_with_model_and_entry().
+func ComboBoxNewWithModelAndEntry(model ITreeModel) (*ComboBox, error) {
+	c := C.gtk_combo_box_new_with_model_and_entry(model.toTreeModel())
+	if c == nil {
+		return nil, nilPtrErr
+	}
+	obj := glib.Take(unsafe.Pointer(c))
+	return wrapComboBox(obj), nil
+}
+
+// GetWrapWidth is a wrapper around gtk_combo_box_get_wrap_width().
+func (v *ComboBox) GetWrapWidth() int {
+	c := C.gtk_combo_box_get_wrap_width(v.native())
+	return int(c)
+}
+
+// SetWrapWidth is a wrapper around gtk_combo_box_set_wrap_width().
+func (v *ComboBox) SetWrapWidth(wrapWidth int) {
+	C.gtk_combo_box_set_wrap_width(v.native(), C.gint(wrapWidth))
+}
+
+// GetRowSpanColumn is a wrapper around gtk_combo_box_get_row_span_column().
+func (v *ComboBox) GetRowSpanColumn() int {
+	c := C.gtk_combo_box_get_row_span_column(v.native())
+	return int(c)
+}
+
+// SetRowSpanColumn is a wrapper around gtk_combo_box_set_row_span_column().
+func (v *ComboBox) SetRowSpanColumn(rowSpan int) {
+	C.gtk_combo_box_set_row_span_column(v.native(), C.gint(rowSpan))
+}
+
+// GetColumnSpanColumn is a wrapper around gtk_combo_box_get_column_span_column().
+func (v *ComboBox) GetColumnSpanColumn() int {
+	c := C.gtk_combo_box_get_column_span_column(v.native())
+	return int(c)
+}
+
+// SetColumnSpanColumn is a wrapper around gtk_combo_box_set_column_span_column().
+func (v *ComboBox) SetColumnSpanColumn(wrapWidth int) {
+	C.gtk_combo_box_set_column_span_column(v.native(), C.gint(wrapWidth))
+}
+
 // GetActive is a wrapper around gtk_combo_box_get_active().
 func (v *ComboBox) GetActive() int {
 	c := C.gtk_combo_box_get_active(v.native())
@@ -165,6 +209,15 @@ func (v *ComboBox) SetModel(model ITreeModel) {
 	C.gtk_combo_box_set_model(v.native(), mptr)
 }
 
+// PopupForDevice is a wrapper around gtk_combo_box_popup_for_device()
+func (v *ComboBox) PopupForDevice(device *gdk.Device) {
+	var devicePtr *C.GdkDevice
+	if device != nil {
+		devicePtr = (*C.GdkDevice)(unsafe.Pointer(device.Native()))
+	}
+	C.gtk_combo_box_popup_for_device(v.native(), devicePtr)
+}
+
 // Popup is a wrapper around gtk_combo_box_popup().
 func (v *ComboBox) Popup() {
 	C.gtk_combo_box_popup(v.native())
@@ -175,26 +228,36 @@ func (v *ComboBox) Popdown() {
 	C.gtk_combo_box_popdown(v.native())
 }
 
-// HasEntry is a wrapper around gtk_combo_box_get_has_entry().
-func (v *ComboBox) HasEntry() bool {
+// GetHasEntry is a wrapper around gtk_combo_box_get_has_entry().
+func (v *ComboBox) GetHasEntry() bool {
 	c := C.gtk_combo_box_get_has_entry(v.native())
 	return gobool(c)
 }
 
-// SetEntryTextColumn is a wrapper around gtk_combo_box_set_entry_text_column()
+// SetEntryTextColumn is a wrapper around gtk_combo_box_set_entry_text_column().
 func (v *ComboBox) SetEntryTextColumn(textColumn int) {
 	C.gtk_combo_box_set_entry_text_column(v.native(), C.gint(textColumn))
 }
 
-
-// GetEntryTextColumn is a wrapper around gtk_combo_box_get_entry_text_column()
+// GetEntryTextColumn is a wrapper around gtk_combo_box_get_entry_text_column().
 func (v *ComboBox) GetEntryTextColumn() int {
 	c := C.gtk_combo_box_get_entry_text_column(v.native())
 	return int(c)
 }
 
+// SetPopupFixedWidth is a wrapper around gtk_combo_box_set_popup_fixed_width
+func (v *ComboBox) SetPopupFixedWidth(fixedWidth bool) {
+	C.gtk_combo_box_set_popup_fixed_width(v.native(), gbool(fixedWidth))
+}
+
+// GetPopupFixedWidth is a wrapper around gtk_combo_box_get_popup_fixed_width
+func (v *ComboBox) GetPopupFixedWidth() bool {
+	c := C.gtk_combo_box_get_popup_fixed_width(v.native())
+	return gobool(c)
+}
+
 // GetEntry is a convenience func to get the Entry within the ComboBox.
-// If the Combobox does not contain an Entry, an error is thrown.
+// If the Combobox does not contain an Entry, an error is returned.
 func (v *ComboBox) GetEntry() (*Entry, error) {
 	hasEntry := C.gtk_combo_box_get_has_entry(v.native())
 	if hasEntry == C.FALSE {
@@ -321,3 +384,17 @@ func (v *ComboBoxText) GetActiveText() string {
 	defer C.free(unsafe.Pointer(c))
 	return C.GoString(c)
 }
+
+// gtk_combo_box_new_with_area, requires GtkCellArea
+// gtk_combo_box_new_with_area_and_entry, requires GtkCellArea
+// gtk_combo_box_get_row_separator_func, requires GtkTreeViewRowSeparatorFunc
+// gtk_combo_box_set_row_separator_func, requires GtkTreeViewRowSeparatorFunc
+// gtk_combo_box_get_popup_accessible, requires AtkObject
+// gtk_combo_box_set_add_tearoffs, deprecated since 3.10
+// gtk_combo_box_get_add_tearoffs, deprecated since 3.10
+// gtk_combo_box_set_title, deprecated since 3.10
+// gtk_combo_box_get_title, deprecated since 3.10
+// gtk_combo_box_set_focus_on_click, deprecated since 3.20
+// gtk_combo_box_get_focus_on_click, deprecated since 3.20
+// gtk_combo_box_set_button_sensitivity, requires GtkSensitivityType
+// gtk_combo_box_get_button_sensitivity, requires GtkSensitivityType

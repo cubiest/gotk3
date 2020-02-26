@@ -2097,7 +2097,7 @@ type RGBA struct {
 }
 
 func marshalRGBA(p uintptr) (interface{}, error) {
-	c := C.g_value_get_boxed((*C.GValue)(unsafe.Pointer(p)))
+	c := C.g_value_get_object((*C.GValue)(unsafe.Pointer(p)))
 	return WrapRGBA(unsafe.Pointer(c)), nil
 }
 
@@ -2161,10 +2161,6 @@ func (c *RGBA) String() string {
 // void 	gdk_rgba_free ()
 // gboolean 	gdk_rgba_equal ()
 // guint 	gdk_rgba_hash ()
-
-/*
- * GdkRGBA
- */
 
 /*
  * GdkRectangle

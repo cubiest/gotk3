@@ -5380,9 +5380,6 @@ func (v *ListStore) SetValue(iter *TreeIter, column int, value interface{}) erro
 	case *gdk.Pixbuf:
 		pix := value.(*gdk.Pixbuf)
 		C._gtk_list_store_set(v.native(), iter.native(), C.gint(column), unsafe.Pointer(pix.Native()))
-	case *gdk.RGBA:
-		rgba := value.(*gdk.RGBA)
-		C._gtk_list_store_set(v.native(), iter.native(), C.gint(column), unsafe.Pointer(rgba.Native()))
 
 	default:
 		gv, err := glib.GValue(value)

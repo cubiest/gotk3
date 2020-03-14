@@ -385,10 +385,15 @@ func (v *Widget) Unmap() {
 	C.gtk_widget_unmap(v.native())
 }
 
+// Draw is a wrapper around gtk_widget_draw().
+func (v *Widget) Draw(widget *gtk.Widget, context *cairo.Context) {
+	nativeSurface := (*C.cairo_t)(unsafe.Pointer(context.Native()))
+	C.gtk_widget_draw(widget.native(), nativeSurface)
+}
+
 // TODO:
 //void gtk_widget_realize(GtkWidget *widget);
 //void gtk_widget_unrealize(GtkWidget *widget);
-//void gtk_widget_draw(GtkWidget *widget, cairo_t *cr);
 //void gtk_widget_queue_resize(GtkWidget *widget);
 //void gtk_widget_queue_resize_no_redraw(GtkWidget *widget);
 // gtk_widget_queue_allocate().

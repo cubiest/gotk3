@@ -2497,6 +2497,36 @@ func (v *Window) PixbufGetFromWindow(x, y, w, h int) (*Pixbuf, error) {
 	return p, nil
 }
 
+// GetGeometry is a wrapper around gdk_window_get_geometry().
+func (v *Window) GetGeometry() (x, y, width, height int) {
+	var xn, yn, widthn, heightn C.gint
+	C.gdk_window_get_geometry(v.native())
+	return int(xn), int(yn), int(widthn), int(heightn)
+}
+
+// GetOrigin is a wrapper around gdk_window_get_origin
+func (v *Window) GetOrigin(window *gdk.Window) (int, int) {
+	var wx, wy C.gint
+	C.gdk_window_get_origin(v.native(), &wx, &wy)
+	return int(wx), int(wy)
+}
+
+// GetRootOrigin is a wrapper around gdk_window_get_root_origin
+func GetRootOrigin(window *gdk.Window) (int, int) {
+	var wx, wy C.gint
+
+	C.gdk_window_get_root_origin(v.native(), &wx, &wy)
+	return int(wx), int(wy)
+}
+
+// GetFrameExtents is a wrapper around gdk_window_get_frame_extents
+func GetFrameExtents(window *gdk.Window) *gdk.Rectangle {
+	rect := new(C.GdkRectangle)
+
+	C.gdk_window_get_frame_extents(v.native(), rect)
+	return wrapRectangle(rect)
+}
+
 // GetDevicePosition is a wrapper around gdk_window_get_device_position()
 func (v *Window) GetDevicePosition(d *Device) (*Window, int, int, ModifierType) {
 	var x C.gint
@@ -2507,6 +2537,12 @@ func (v *Window) GetDevicePosition(d *Device) (*Window, int, int, ModifierType) 
 	rw := &Window{obj}
 	runtime.SetFinalizer(rw, func(_ interface{}) { obj.Unref() })
 	return rw, int(x), int(y), ModifierType(mt)
+}
+
+// GetDefaultRootWindow is a wrapper around gdk_get_default_root_window()
+func GetDefaultRootWindow() *gdk.Window {
+	native := C.gdk_get_default_root_window()
+	return toWindow(native)
 }
 
 // TODO:

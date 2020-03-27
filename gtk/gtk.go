@@ -9204,10 +9204,10 @@ func (v *TreeModel) GetValue(iter *TreeIter, column int) (*glib.Value, error) {
 		return nil, err
 	}
 	C.gtk_tree_model_get_value(
-		(*C.GtkTreeModel)(unsafe.Pointer(v.native())),
+		v.native(),
 		iter.native(),
 		C.gint(column),
-		(*C.GValue)(unsafe.Pointer(val.Native())))
+		(*C.GValue)(val.Native()))
 	return val, nil
 }
 

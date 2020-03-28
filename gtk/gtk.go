@@ -5378,7 +5378,7 @@ func (v *ListStore) InsertWithValues(iter *TreeIter, position int, inColumns []i
 			return err
 		}
 
-		var cvp *C.GValue = (*C.GValue)(gv.Native())
+		var cvp *C.GValue = (*C.GValue)(unsafe.Pointer(gv.Native()))
 		cValues = append(cValues, *cvp)
 	}
 	var cColumnsPointer *C.gint = &cColumns[0]
@@ -9207,7 +9207,7 @@ func (v *TreeModel) GetValue(iter *TreeIter, column int) (*glib.Value, error) {
 		v.native(),
 		iter.native(),
 		C.gint(column),
-		(*C.GValue)(val.Native()))
+		(*C.GValue)(unsafe.Pointer(val.Native())))
 	return val, nil
 }
 
@@ -10213,7 +10213,7 @@ func (v *TreeStore) InsertWithValues(iter, parent *TreeIter, position int, inCol
 			return err
 		}
 
-		var cvp *C.GValue = (*C.GValue)(gv.Native())
+		var cvp *C.GValue = (*C.GValue)(unsafe.Pointer(gv.Native()))
 		cValues = append(cValues, *cvp)
 	}
 	var cColumnsPointer *C.gint = &cColumns[0]

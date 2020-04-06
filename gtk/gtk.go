@@ -51,6 +51,7 @@ import "C"
 import (
 	"errors"
 	"fmt"
+	"log"
 	"reflect"
 	"runtime"
 	"sync"
@@ -9203,11 +9204,20 @@ func (v *TreeModel) GetValue(iter *TreeIter, column int) (*glib.Value, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	log.Printf("value: %T, %#v", val, val)
+	n := val.Native()
+	log.Printf("native: %T, %#v", val, val)
+	nptr := unsafe.Pointer(n)
+	log.Printf("pointer: %T, %#v", val, val)
+	casted := (*C.GValue)(nptr)
+	log.Printf("casted: %T, %#v", val, val)
+
 	C.gtk_tree_model_get_value(
 		v.native(),
 		iter.native(),
 		C.gint(column),
-		(*C.GValue)(unsafe.Pointer(val.Native())))
+		casted)
 	return val, nil
 }
 

@@ -697,10 +697,6 @@ func (v *Object) SetProperty(name string, value interface{}) error {
 	cstr := C.CString(name)
 	defer C.free(unsafe.Pointer(cstr))
 
-	if _, ok := value.(Object); ok {
-		value = value.(Object).GObject
-	}
-
 	p, err := GValue(value)
 	if err != nil {
 		return errors.New("Unable to perform type conversion")
@@ -1088,12 +1084,12 @@ func GValue(v interface{}) (gvalue *Value, err error) {
 		val.SetString(e)
 		return val, nil
 
-	case *Object:
-		val, err := ValueInit(TYPE_OBJECT)
+	case IObject:
+		val, err := ValueInit(e.toObject().TypeFromInstance())
 		if err != nil {
 			return nil, err
 		}
-		val.SetInstance(uintptr(unsafe.Pointer(e.GObject)))
+		val.SetInstance(uintptr(unsafe.Pointer(e.toGObject())))
 		return val, nil
 
 	default:

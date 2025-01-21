@@ -2982,8 +2982,9 @@ func wrapCheckMenuItem(obj *glib.Object) *CheckMenuItem {
 		return nil
 	}
 
+	actionable := wrapActionable(obj)
 	return &CheckMenuItem{MenuItem{Bin{Container{Widget{
-		glib.InitiallyUnowned{obj}}}}}}
+		glib.InitiallyUnowned{obj}}}}, actionable}}
 }
 
 // CheckMenuItemNew is a wrapper around gtk_check_menu_item_new().
@@ -6488,6 +6489,9 @@ func (v *MenuButton) GetAlignWidget() (IWidget, error) {
 // MenuItem is a representation of GTK's GtkMenuItem.
 type MenuItem struct {
 	Bin
+
+	// Interfaces
+	IActionable
 }
 
 // IMenuItem is an interface type implemented by all structs
@@ -6526,7 +6530,8 @@ func wrapMenuItem(obj *glib.Object) *MenuItem {
 		return nil
 	}
 
-	return &MenuItem{Bin{Container{Widget{glib.InitiallyUnowned{obj}}}}}
+	actionable := &Actionable{obj}
+	return &MenuItem{Bin{Container{Widget{glib.InitiallyUnowned{obj}}}}, actionable}
 }
 
 // MenuItemNew() is a wrapper around gtk_menu_item_new().
@@ -7588,8 +7593,9 @@ func wrapRadioMenuItem(obj *glib.Object) *RadioMenuItem {
 		return nil
 	}
 
+	actionable := wrapActionable(obj)
 	return &RadioMenuItem{CheckMenuItem{MenuItem{Bin{Container{
-		Widget{glib.InitiallyUnowned{obj}}}}}}}
+		Widget{glib.InitiallyUnowned{obj}}}}, actionable}}}
 }
 
 // RadioMenuItemNew is a wrapper around gtk_radio_menu_item_new().
@@ -8793,7 +8799,8 @@ func wrapSeparatorMenuItem(obj *glib.Object) *SeparatorMenuItem {
 		return nil
 	}
 
-	return &SeparatorMenuItem{MenuItem{Bin{Container{Widget{glib.InitiallyUnowned{obj}}}}}}
+	actionable := wrapActionable(obj)
+	return &SeparatorMenuItem{MenuItem{Bin{Container{Widget{glib.InitiallyUnowned{obj}}}}, actionable}}
 }
 
 // SeparatorMenuItemNew is a wrapper around gtk_separator_menu_item_new().
@@ -9218,6 +9225,9 @@ func (v *Statusbar) RemoveAll(contextID uint) {
 // Switch is a representation of GTK's GtkSwitch.
 type Switch struct {
 	Widget
+
+	// Interfaces
+	IActionable
 }
 
 // native returns a pointer to the underlying GtkSwitch.
@@ -9240,7 +9250,8 @@ func wrapSwitch(obj *glib.Object) *Switch {
 		return nil
 	}
 
-	return &Switch{Widget{glib.InitiallyUnowned{obj}}}
+	actionable := &Actionable{obj}
+	return &Switch{Widget{glib.InitiallyUnowned{obj}}, actionable}
 }
 
 // SwitchNew is a wrapper around gtk_switch_new().

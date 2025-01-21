@@ -14,7 +14,9 @@
 // ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 // OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+//go:build !gtk_3_6 && !gtk_3_8 && !gtk_3_10
 // +build !gtk_3_6,!gtk_3_8,!gtk_3_10
+
 // not use this: go build -tags gtk_3_8'. Otherwise, if no build tags are used, GTK 3.10
 
 package gtk
@@ -31,6 +33,7 @@ import (
 
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/glib"
+	"github.com/gotk3/gotk3/internal/callback"
 )
 
 /*
@@ -360,8 +363,19 @@ func (fb *FlowBox) GetSelectionMode() SelectionMode {
 
 // TODO gtk_flow_box_set_filter_func()
 // TODO gtk_flow_box_invalidate_filter()
-// TODO gtk_flow_box_set_sort_func()
-// TODO gtk_flow_box_invalidate_sort()
+
+// FlowBoxSortFunc is a representation of GtkFlowBoxSortFunc.
+type FlowBoxSortFunc func(child1, child2 *FlowBoxChild) int
+
+// SetSortFunc is a wrapper around gtk_flow_box_set_sort_func()
+func (fb *FlowBox) SetSortFunc(fn FlowBoxSortFunc) {
+	C._gtk_flow_box_set_sort_func(unsafe.Pointer(fb.GObject), C.gpointer(callback.Assign(fn)))
+}
+
+func (fb *FlowBox) InvalidateSort() {
+	C.gtk_flow_box_invalidate_sort(fb.native())
+}
+
 // TODO 3.18 gtk_flow_box_bind_model()
 
 /*

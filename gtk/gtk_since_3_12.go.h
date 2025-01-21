@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include "gtk.go.h" // for gotk3_callbackDelete
+
 static GtkFlowBox *toGtkFlowBox(void *p) { return (GTK_FLOW_BOX(p)); }
 
 static GtkFlowBoxChild *toGtkFlowBoxChild(void *p) {
@@ -25,3 +27,13 @@ static GtkFlowBoxChild *toGtkFlowBoxChild(void *p) {
 static GMenuModel *toGMenuModel(void *p) { return (G_MENU_MODEL(p)); }
 
 static GtkPopover *toGtkPopover(void *p) { return (GTK_POPOVER(p)); }
+
+
+extern gint goFlowBoxSortFuncs(FlowBoxChild *child1, FlowBoxChild *child2,
+                               gpointer user_data);
+
+static inline void _gtk_flow_box_set_sort_func(GtkFlowBox *box,
+                                               gpointer user_data) {
+  gtk_flow_box_set_sort_func(box, (GtkFlowBoxSortFunc)(goFlowBoxSortFuncs),
+                             user_data, (GDestroyNotify)(gotk3_callbackDelete));
+}

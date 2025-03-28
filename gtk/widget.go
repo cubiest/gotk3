@@ -102,11 +102,12 @@ func (v *Widget) ToWidget() *Widget {
 // The returned value needs to be type-asserted, before it can be used.
 //
 // Example:
-//   // you know that the parent is an object of type *gtk.ApplicationWindow,
-//   // or you want to check just in case
-//   parentWindow, _ := myWindow.GetTransientFor()
-//   intermediate, _ := parentWindow.Cast()
-//   appWindow, typeAssertSuccessful := intermediate.(*gtk.ApplicationWindow)
+//
+//	// you know that the parent is an object of type *gtk.ApplicationWindow,
+//	// or you want to check just in case
+//	parentWindow, _ := myWindow.GetTransientFor()
+//	intermediate, _ := parentWindow.Cast()
+//	appWindow, typeAssertSuccessful := intermediate.(*gtk.ApplicationWindow)
 func (v *Widget) Cast() (IWidget, error) {
 	return castWidget(v.native())
 }
@@ -755,9 +756,24 @@ func (v *Widget) GetToplevel() (IWidget, error) {
 }
 
 // TODO:
-// gtk_widget_get_ancestor().
 // gtk_widget_get_visual().
-// gtk_widget_is_ancestor().
+
+// GetAncestor is a wrapper around gtk_widget_get_ancestor().
+//
+// To get a valid type, create it like this: `glib.Type(C.gtk_list_box_row_get_type())`.
+func (v *Widget) GetAncestor(widgetType glib.Type) (IWidget, error) {
+	c := C.gtk_widget_get_ancestor(v.native(), C.GType(widgetType))
+	if c == nil {
+		return nil, nilPtrErr
+	}
+	return castWidget(c)
+}
+
+// IsAncestor is a wrapper around gtk_widget_is_ancestor().
+func (v *Widget) IsAncestor(ancestor IWidget) bool {
+	c := C.gtk_widget_is_ancestor(v.native(), ancestor.toWidget())
+	return gobool(c)
+}
 
 // GetTooltipMarkup is a wrapper around gtk_widget_get_tooltip_markup().
 // A non-nil error is returned in the case that gtk_widget_get_tooltip_markup

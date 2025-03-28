@@ -507,10 +507,14 @@ func (v *Widget) Unmap() {
 }
 
 // TODO:
-//void gtk_widget_draw(GtkWidget *widget, cairo_t *cr);
 //void gtk_widget_queue_resize(GtkWidget *widget);
 //void gtk_widget_queue_resize_no_redraw(GtkWidget *widget);
 // gtk_widget_queue_allocate().
+
+// Draw is a wrapper around gtk_widget_draw().
+func (v *Widget) Draw(context *cairo.Context) {
+	C.gtk_widget_draw(v.native(), (*C.cairo_t)(unsafe.Pointer(context.Native())))
+}
 
 // Realize is a wrapper around gtk_widget_realize().
 func (v *Widget) Realize() {

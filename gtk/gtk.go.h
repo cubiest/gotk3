@@ -599,7 +599,7 @@ static inline void _gtk_tree_sortable_set_sort_func(GtkTreeSortable *sortable,
                                                     gpointer user_data) {
   gtk_tree_sortable_set_sort_func(
       sortable, sort_column_id,
-      (GtkTreeIterCompareFunc)(goTreeSortableSortFunc), user_data, NULL);
+      (GtkTreeIterCompareFunc)(goTreeSortableSortFunc), user_data, (GDestroyNotify)(gotk3_callbackDelete));
 }
 
 static inline void

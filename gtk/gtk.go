@@ -4465,8 +4465,9 @@ func wrapEntryCompletion(obj *glib.Object) *EntryCompletion {
 	return &EntryCompletion{obj}
 }
 
-// TODO:
-// GtkEntryCompletionMatchFunc
+// EntryCompletionMatchFunc is a representation of GtkEntryCompletionMatchFunc.
+// It defines the function prototype for the match function (f arg) for (* EntryCompletion).SetMatchFunc
+type EntryCompletionMatchFunc func(v *EntryCompletion, key string, iter *TreeIter) bool
 
 // EntryCompletionNew is a wrapper around gtk_entry_completion_new
 func EntryCompletionNew() (*EntryCompletion, error) {
@@ -4500,8 +4501,10 @@ func (v *EntryCompletion) GetModel() (ITreeModel, error) {
 	return castTreeModel(c)
 }
 
-// TODO:
-// gtk_entry_completion_set_match_func().
+// SetMatchFunc() is a wrapper around gtk_entry_completion_set_match_func().
+func (v *EntryCompletion) SetMatchFunc(f EntryCompletionMatchFunc) {
+	C._gtk_entry_completion_set_match_func(v.native(), C.gpointer(callback.Assign(f)))
+}
 
 // SetMinimumKeyLength is a wrapper around gtk_entry_completion_set_minimum_key_length
 func (v *EntryCompletion) SetMinimumKeyLength(minimumLength int) {
@@ -4514,14 +4517,47 @@ func (v *EntryCompletion) GetMinimumKeyLength() int {
 	return int(c)
 }
 
-// TODO:
-// gtk_entry_completion_compute_prefix().
-// gtk_entry_completion_complete().
-// gtk_entry_completion_get_completion_prefix().
-// gtk_entry_completion_insert_prefix().
-// gtk_entry_completion_insert_action_text().
-// gtk_entry_completion_insert_action_markup().
-// gtk_entry_completion_delete_action().
+// Complete() is a wrapper around gtk_entry_completion_complete().
+func (v *EntryCompletion) Complete() {
+	C.gtk_entry_completion_complete(v.native())
+}
+
+// ComputePrefix is a wrapper around gtk_entry_completion_compute_prefix().
+func (v *EntryCompletion) ComputePrefix(key string) string {
+	cstr := C.CString(key)
+	defer C.free(unsafe.Pointer(cstr))
+	c := C.gtk_entry_completion_compute_prefix(v.native(), cstr)
+	return goString(c)
+}
+
+// GetCompletionPrefix is a wrapper around gtk_entry_completion_get_completion_prefix().
+func (v *EntryCompletion) GetCompletionPrefix() string {
+	return goString(C.gtk_entry_completion_get_completion_prefix(v.native()))
+}
+
+// InsertPrefix is a wrapper around gtk_entry_completion_insert_prefix().
+func (v *EntryCompletion) InsertPrefix() {
+	C.gtk_entry_completion_insert_prefix(v.native())
+}
+
+// InsertActionText is a wrapper around gtk_entry_completion_insert_action_text().
+func (v *EntryCompletion) InsertActionText(index int, text string) {
+	cstr := C.CString(text)
+	defer C.free(unsafe.Pointer(cstr))
+	C.gtk_entry_completion_insert_action_text(v.native(), C.gint(index), (*C.gchar)(cstr))
+}
+
+// InsertActionMarkup is a wrapper around gtk_entry_completion_insert_action_markup().
+func (v *EntryCompletion) InsertActionMarkup(index int, markup string) {
+	cstr := C.CString(markup)
+	defer C.free(unsafe.Pointer(cstr))
+	C.gtk_entry_completion_insert_action_markup(v.native(), C.gint(index), (*C.gchar)(cstr))
+}
+
+// DeleteAction is a wrapper around gtk_entry_completion_delete_action().
+func (v *EntryCompletion) DeleteAction(index int) {
+	C.gtk_entry_completion_delete_action(v.native(), C.gint(index))
+}
 
 // SetTextColumn is a wrapper around gtk_entry_completion_set_text_column
 func (v *EntryCompletion) SetTextColumn(textColumn int) {
@@ -4545,9 +4581,16 @@ func (v *EntryCompletion) GetInlineCompletion() bool {
 	return gobool(c)
 }
 
-// TODO
-// gtk_entry_completion_set_inline_selection().
-// gtk_entry_completion_get_inline_selection().
+// SetInlineSelection is a wrapper around gtk_entry_completion_set_inline_selection().
+func (v *EntryCompletion) SetInlineSelection(inlineSelection bool) {
+	C.gtk_entry_completion_set_inline_selection(v.native(), gbool(inlineSelection))
+}
+
+// GetInlineSelection is a wrapper around gtk_entry_completion_get_inline_selection().
+func (v *EntryCompletion) GetInlineSelection() bool {
+	c := C.gtk_entry_completion_get_inline_selection(v.native())
+	return gobool(c)
+}
 
 // SetPopupCompletion is a wrapper around gtk_entry_completion_set_popup_completion
 func (v *EntryCompletion) SetPopupCompletion(popupCompletion bool) {

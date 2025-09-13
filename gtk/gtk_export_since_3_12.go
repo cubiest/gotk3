@@ -4,6 +4,7 @@
 
 package gtk
 
+// #include <gtk/gtk.h>
 import "C"
 import (
 	"unsafe"

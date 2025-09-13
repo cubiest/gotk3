@@ -24,12 +24,10 @@ static GtkFlowBoxChild *toGtkFlowBoxChild(void *p) {
   return (GTK_FLOW_BOX_CHILD(p));
 }
 
-static GMenuModel *toGMenuModel(void *p) { return (G_MENU_MODEL(p)); }
-
 static GtkPopover *toGtkPopover(void *p) { return (GTK_POPOVER(p)); }
 
 
-extern gint goFlowBoxSortFuncs(FlowBoxChild *child1, FlowBoxChild *child2,
+extern gint goFlowBoxSortFuncs(GtkFlowBoxChild *child1, GtkFlowBoxChild *child2,
                                gpointer user_data);
 
 static inline void _gtk_flow_box_set_sort_func(GtkFlowBox *box,

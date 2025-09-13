@@ -133,6 +133,16 @@ static GtkEntryCompletion *toGtkEntryCompletion(void *p) {
   return (GTK_ENTRY_COMPLETION(p));
 }
 
+extern gboolean goEntryCompletionMatchFunc(GtkEntryCompletion *completion, gchar *key,
+                                   GtkTreeIter *iter, gpointer data);
+
+static inline void _gtk_entry_completion_set_match_func(GtkEntryCompletion *completion,
+                                                    gpointer user_data) {
+  gtk_entry_completion_set_match_func(
+      completion, (GtkEntryCompletionMatchFunc)(goEntryCompletionMatchFunc),
+      user_data, (GDestroyNotify)(gotk3_callbackDelete));
+}
+
 static GtkAdjustment *toGtkAdjustment(void *p) { return (GTK_ADJUSTMENT(p)); }
 
 static GtkAccelGroup *toGtkAccelGroup(void *p) { return (GTK_ACCEL_GROUP(p)); }
@@ -599,7 +609,7 @@ static inline void _gtk_tree_sortable_set_sort_func(GtkTreeSortable *sortable,
                                                     gpointer user_data) {
   gtk_tree_sortable_set_sort_func(
       sortable, sort_column_id,
-      (GtkTreeIterCompareFunc)(goTreeSortableSortFunc), user_data, NULL);
+      (GtkTreeIterCompareFunc)(goTreeSortableSortFunc), user_data, (GDestroyNotify)(gotk3_callbackDelete));
 }
 
 static inline void

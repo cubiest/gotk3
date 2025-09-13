@@ -46,6 +46,16 @@ func goBuilderConnect(
 	gobj.Connect(s, handler)
 }
 
+//export goEntryCompletionMatchFunc
+func goEntryCompletionMatchFunc(completion *C.GtkEntryCompletion, key *C.gchar, iter *C.GtkTreeIter, data C.gpointer) C.gboolean {
+	fn := callback.Get(uintptr(data)).(EntryCompletionMatchFunc)
+	return gbool(fn(
+		wrapEntryCompletion(glib.Take(unsafe.Pointer(completion))),
+		C.GoString(key),
+		&TreeIter{(C.GtkTreeIter)(*iter)},
+	))
+}
+
 //export goTreeViewSearchEqualFunc
 func goTreeViewSearchEqualFunc(model *C.GtkTreeModel, column C.gint, key *C.gchar, iter *C.GtkTreeIter, data C.gpointer) C.gboolean {
 	fn := callback.Get(uintptr(data)).(TreeViewSearchEqualFunc)

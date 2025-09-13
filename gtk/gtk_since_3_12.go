@@ -369,7 +369,7 @@ type FlowBoxSortFunc func(child1, child2 *FlowBoxChild) int
 
 // SetSortFunc is a wrapper around gtk_flow_box_set_sort_func()
 func (fb *FlowBox) SetSortFunc(fn FlowBoxSortFunc) {
-	C._gtk_flow_box_set_sort_func(unsafe.Pointer(fb.GObject), C.gpointer(callback.Assign(fn)))
+	C._gtk_flow_box_set_sort_func(fb.native(), C.gpointer(callback.Assign(fn)))
 }
 
 func (fb *FlowBox) InvalidateSort() {
